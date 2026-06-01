@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>hAI.OTPatHome – Self‑Hosted OTP@Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Self‑hosted TOTP mit 2FAuth, Portainer Stack und GitHub Pages Doku." />
+  <link rel="icon" href="logo-hai-otpathome.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent2: #a855f7;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.98));
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      max-width: 960px;
+      width: 100%;
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(148,163,184,0.2);
+      border: 1px solid rgba(148,163,184,0.35);
+      backdrop-filter: blur(24px);
+    }
+    header {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    header img {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 20% 20%, #22d3ee, #0ea5e9 40%, #4f46e5 80%);
+      padding: 6px;
+      box-shadow: 0 12px 35px rgba(59,130,246,0.8);
+    }
+    header h1 {
+      font-size: 1.9rem;
+      letter-spacing: 0.05em;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    header h1 span.logo-text {
+      background: linear-gradient(120deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    header p {
+      margin: 0.25rem 0 0;
+      color: var(--muted);
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.75rem 0 1.5rem;
+    }
+    .tag {
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--muted);
+      background: rgba(15,23,42,0.9);
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 2rem;
+    }
+    @media (max-width: 800px) {
+      .card { padding: 1.75rem 1.25rem; }
+      main { grid-template-columns: minmax(0, 1fr); }
+      header { flex-direction: row; align-items: center; }
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin: 0 0 0.75rem;
+    }
+    p { font-size: 0.95rem; line-height: 1.6; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+    }
+    pre {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      border: 1px solid rgba(15,118,213,0.5);
+      color: #e5e7eb;
+      overflow-x: auto;
+      position: relative;
+    }
+    pre::before {
+      content: "docker-compose.yml";
+      position: absolute;
+      top: 0.45rem;
+      right: 0.8rem;
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(56,189,248,0.7);
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.18), rgba(15,23,42,0.98));
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn.secondary {
+      border-color: rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.9);
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <img src="logo-hai-otpathome.svg" alt="hAI.OTPatHome Logo" />
+      <div>
+        <h1><span class="logo-text">hAI.OTPatHome</span> 🔐</h1>
+        <p>Self‑hosted TOTP‑Server auf Basis von 2FAuth – OTP‑Codes sicher im eigenen Heimnetz.</p>
+        <div class="tags">
+          <span class="tag">Docker</span>
+          <span class="tag">Portainer Stack</span>
+          <span class="tag">2FAuth</span>
+          <span class="tag">Self‑Hosted OTP</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>🚀 Was ist hAI.OTPatHome?</h2>
+        <p>
+          hAI.OTPatHome ist ein leichtgewichtiges Setup, um <strong>TOTP‑Codes</strong> im eigenen Netzwerk zu hosten – als Alternative
+          zu Handy‑Authenticator‑Apps. Die Codes liegen dabei auf deinem Server und sind über eine moderne Web‑UI erreichbar.
+        </p>
+        <p>
+          Im Kern läuft die Open‑Source‑App <a href="https://docs.2fauth.app/" target="_blank" rel="noreferrer">2FAuth</a> in einem Docker‑Container;
+          verwaltet wird alles bequem als Portainer‑Stack.
+        </p>
+
+        <h2>✨ Features</h2>
+        <ul>
+          <li>🔑 Self‑hosted TOTP für deine Logins</li>
+          <li>🌐 Zugriff im LAN und optional per Domain von außen</li>
+          <li>📦 Einfache Bereitstellung via Docker / Portainer</li>
+          <li>🧠 Verständliche Konfiguration & ENV‑Variablen</li>
+        </ul>
+
+        <div class="btn-row">
+          <a class="btn" href="https://github.com/jbkunama1/hAI.OTPatHome" target="_blank" rel="noreferrer">
+            <span>⭐ Projekt auf GitHub</span>
+          </a>
+          <a class="btn secondary" href="README.md" target="_blank" rel="noreferrer">
+            📘 README ansehen
+          </a>
+        </div>
+      </section>
+
+      <section>
+        <h2>⚙️ Stack‑Snippet</h2>
+        <p>Minimaler Docker‑Stack für Portainer – Port 4444 nach außen, SQLite‑Datenbank im Volume:</p>
+        <pre><code>version: "3.8"
+
+services:
+  2fauth:
+    image: 2fauth/2fauth:latest
+    container_name: 2fauth
+    restart: unless-stopped
+    ports:
+      - "4444:8000"
+    volumes:
+      - /opt/docker/2fauth:/2fauth
+    environment:
+      APP_NAME: "2FAuth"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      APP_URL: "https://otp.deinedomain.de:4444"
+      APP_KEY: "base64:DEIN_APP_KEY_HIER"
+      APP_TIMEZONE: "Europe/Berlin"
+      DB_CONNECTION: "sqlite"
+      DB_DATABASE: "/2fauth/database/database.sqlite"</code></pre>
+
+        <p class="pill">
+          <span>💡 Tipp:</span>
+          <span>APP_URL immer auf die echte externe URL setzen (inkl. Port & https, falls aktiv).</span>
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
