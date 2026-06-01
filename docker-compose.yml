@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  2fauth:
+    image: 2fauth/2fauth:latest
+    container_name: 2fauth
+    restart: unless-stopped
+
+    ports:
+      # extern:4444 -> container:8000
+      - "4444:8000"
+
+    volumes:
+      - /opt/docker/2fauth:/2fauth
+
+    environment:
+      # Diese Werte idealerweise NICHT im Repo lassen, sondern in Portainer
+      # als einzelne ENV-Variablen setzen oder über ein .env-File überschreiben.
+      APP_NAME: "2FAuth"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      APP_URL: "https://otp.deinedomain.de:4444"
+      APP_KEY: "base64:DEIN_APP_KEY_HIER"
+      APP_TIMEZONE: "Europe/Berlin"
+
+      DB_CONNECTION: "sqlite"
+      DB_DATABASE: "/2fauth/database/database.sqlite"
