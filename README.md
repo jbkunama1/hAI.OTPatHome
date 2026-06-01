@@ -3,7 +3,7 @@
 > **hAI.OTPatHome** ist ein schlankes Setup, um **TOTP‑Codes selbst zu hosten** – ideal als Ersatz für Handy‑Authenticator‑Apps.  
 > Basis ist [2FAuth](https://github.com/Bubka/2FAuth), gepackt in einen Portainer‑Stack für dein Heimnetz. 🚀
 
-![Logo](./logo-hai-otpathome.svg)
+![Logo](./logo_hAI.OTPat.png)
 
 ---
 
