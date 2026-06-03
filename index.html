@@ -120,6 +120,16 @@
       font-size: 0.7rem;
       color: #64748b;
     }
+    .warn {
+      background: rgba(234,179,8,0.08);
+      border: 1px solid rgba(234,179,8,0.35);
+      border-radius: 12px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.85rem;
+      color: #fde68a;
+      margin-top: 0.75rem;
+    }
+    .warn code { color: #fbbf24; }
     a {
       color: var(--accent);
       text-decoration: none;
@@ -212,9 +222,7 @@
       <section>
         <h2>⚙️ Stack‑Snippet</h2>
         <p>Minimaler Docker‑Stack für Portainer – Port 4444 nach außen, SQLite‑Datenbank im Volume:</p>
-        <pre><code>version: "3.8"
-
-services:
+        <pre><code>services:
   2fauth:
     image: 2fauth/2fauth:latest
     container_name: 2fauth
@@ -227,15 +235,22 @@ services:
       APP_NAME: "2FAuth"
       APP_ENV: "production"
       APP_DEBUG: "false"
-      APP_URL: "https://otp.deinedomain.de:4444"
-      APP_KEY: "base64:DEIN_APP_KEY_HIER"
+      APP_URL: "http://DEINE-IP:4444"
+      APP_KEY: "base64:DEIN_APP_KEY"
       APP_TIMEZONE: "Europe/Berlin"
       DB_CONNECTION: "sqlite"
       DB_DATABASE: "/2fauth/database/database.sqlite"</code></pre>
 
+        <div class="warn">
+          ⚠️ <strong>DB-Pfad:</strong> Die SQLite-Datei liegt im Unterordner <code>/database/</code>:<br>
+          <code>DB_DATABASE: "/2fauth/database/database.sqlite"</code><br><br>
+          🔑 <strong>APP_KEY</strong> muss mit <code>base64:</code> beginnen. Generieren mit:<br>
+          <code>docker exec -it 2fauth php artisan key:generate --show</code>
+        </div>
+
         <p class="pill">
-          <span>💡 Tipp:</span>
-          <span>APP_URL immer auf die echte externe URL setzen (inkl. Port & https, falls aktiv).</span>
+          <span>💡</span>
+          <span>APP_URL immer auf die echte IP/Domain setzen (kein Trailing-Slash).</span>
         </p>
       </section>
     </main>

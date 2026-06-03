@@ -14,19 +14,23 @@ services:
       - /opt/docker/2fauth:/2fauth
 
     environment:
-      # Diese Werte idealerweise NICHT im Repo lassen, sondern in Portainer
-      # als einzelne ENV-Variablen setzen oder über ein .env-File überschreiben.
+      # ⚠️ Werte idealerweise NICHT im Repo lassen – in Portainer als ENV-Variablen setzen!
       APP_NAME: "2FAuth"
       APP_ENV: "production"
       APP_DEBUG: "false"
-      # APP_URL ohne Port setzen, wenn du hinter einem Reverse Proxy arbeitest.
-      # Mit direktem Port-Zugriff (ohne Proxy): https://otp.deinedomain.de:4444
-      APP_URL: "https://otp.deinedomain.de"
+
+      # ✅ APP_URL: deine echte IP oder Domain (kein Trailing-Slash!)
+      # Beispiel LAN:    http://192.168.178.10:4444
+      # Beispiel Domain: https://otp.deinedomain.de
+      APP_URL: "http://DEINE-IP-ODER-DOMAIN:4444"
+
+      # 🔑 APP_KEY: MUSS mit "base64:" beginnen!
+      # Generieren mit: docker exec -it 2fauth php artisan key:generate --show
       APP_KEY: "base64:DEIN_APP_KEY_HIER"
+
       APP_TIMEZONE: "Europe/Berlin"
 
       DB_CONNECTION: "sqlite"
-      # Korrekte SQLite-DB-Pfad: direkt im Volume-Root, kein Unterordner!
-      # /2fauth/database/database.sqlite würde beim Start scheitern,
-      # wenn der Unterordner 'database/' nicht manuell angelegt wurde.
-      DB_DATABASE: "/2fauth/database.sqlite"
+      # ✅ Korrekter Pfad: Unterordner /database/ im Volume!
+      # Auf dem Host: /opt/docker/2fauth/database/database.sqlite
+      DB_DATABASE: "/2fauth/database/database.sqlite"
