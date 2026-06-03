@@ -92,20 +92,6 @@ services:
 
 ---
 
-## 🌐 GitHub Pages – Projektseite
-
-Dieses Repository enthält eine einfache `index.html`, die direkt als GitHub Pages Startseite dienen kann.  
-Aktiviere GitHub Pages z. B. unter **Settings → Pages → Source: `main` / `/root`**.
-
-Die Seite zeigt:
-
-- Projektlogo
-- Kurze Erklärung & Features
-- Code‑Snippet für den Stack
-- Links zur 2FAuth‑Doku und zu deinem Heim‑Setup
-
----
-
 ## 🧩 ENV‑Variablen (Übersicht für Portainer)
 
 | Variable        | Beispielwert                          | Beschreibung                          |
