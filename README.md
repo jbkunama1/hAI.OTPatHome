@@ -21,11 +21,11 @@
 ## 💡 Idee
 
 - **Kein Handy nötig:** Zugriff auf deine TOTP‑Codes direkt im Browser (Desktop oder Mobile).
-- **Self‑Hosted:** Läuft z. B. auf einem Debian/DietPi‑Server mit Docker & Portainer in deinem LAN.
+- **Self‑Hosted:** Läuft z. B. auf einem Debian/DietPi‑Server mit Docker & Portainer in deinem LAN.
 - **Von außen erreichbar:** Optional über eigene Domain + Port‑Forwarding oder Reverse Proxy.
 - **Einfacher Stack:** Ein Service, ein Volume, fertig.
 
-Unter der Haube läuft [2FAuth](https://docs.2fauth.app/), eine spezialisierte Web‑App für TOTP‑Verwaltung.[web:33][web:44]
+Unter der Haube läuft [2FAuth](https://docs.2fauth.app/), eine spezialisierte Web‑App für TOTP‑Verwaltung.
 
 ---
 
@@ -45,7 +45,26 @@ Unter der Haube läuft [2FAuth](https://docs.2fauth.app/), eine spezialisierte W
 ```
 
 - 2FAuth läuft im Container auf Port **8000**
-- Extern erreichbar z. B. über Port **4444** oder via Reverse Proxy (443/HTTPS).[web:33][web:35]
+- Extern erreichbar z. B. über Port **4444** oder via Reverse Proxy (443/HTTPS).
+
+---
+
+## ⚠️ Wichtiger Hinweis: Host-Verzeichnis vorbereiten
+
+> **Vor dem ersten Start** muss das Volume-Verzeichnis auf dem Host manuell angelegt werden –  
+> sonst wird es von Docker als `root` erstellt und der Container (läuft als UID/GID 1000) kann nicht schreiben.
+
+```bash
+mkdir -p /opt/docker/2fauth
+touch /opt/docker/2fauth/database.sqlite
+chown -R 1000:1000 /opt/docker/2fauth
+chmod 755 /opt/docker/2fauth
+```
+
+**Warum `/2fauth/database.sqlite` und nicht `/2fauth/database/database.sqlite`?**  
+Der Unterordner `database/` wird vom Container nicht automatisch angelegt. Existiert er nicht,  
+schlägt `touch /2fauth/database/database.sqlite` beim Start mit einem Fehler fehl.  
+Der korrekte, robuste Pfad legt die Datei direkt im Volume-Root ab: `/2fauth/database.sqlite`.
 
 ---
 
@@ -70,25 +89,27 @@ services:
       APP_NAME: "2FAuth"
       APP_ENV: "production"
       APP_DEBUG: "false"
-      APP_URL: "https://otp.deinedomain.de:4444"
+      APP_URL: "https://otp.deinedomain.de"
       APP_KEY: "base64:DEIN_APP_KEY_HIER"
       APP_TIMEZONE: "Europe/Berlin"
 
       DB_CONNECTION: "sqlite"
-      DB_DATABASE: "/2fauth/database/database.sqlite"
+      DB_DATABASE: "/2fauth/database.sqlite"
 ```
 
 ### 🔧 Schritte
 
-1. **Volume‑Pfad anpassen**  
+1. **Host-Verzeichnis anlegen** (siehe Hinweis oben)
+2. **Volume‑Pfad anpassen**  
    `/opt/docker/2fauth` auf deinen Wunschpfad ändern.
-2. **APP_URL setzen**  
+3. **APP_URL setzen**  
    - Nur LAN: `http://192.168.x.y:4444`  
-   - Mit Domain: `https://otp.deinedomain.de:4444` oder hinter Reverse Proxy ohne Port.[web:33][web:45]
-3. **APP_KEY generieren**  
-   Mit einem Laravel‑Key‑Generator (z. B. lokal mit `php artisan key:generate --show`) einen `base64:`‑Key erzeugen und einsetzen.[web:33][web:37]
-4. Stack in **Portainer** als neuen Stack anlegen, `docker-compose.yml` einfügen oder Datei referenzieren.
-5. 2FAuth im Browser aufrufen und ein Admin‑Konto anlegen.
+   - Mit Domain + Reverse Proxy: `https://otp.deinedomain.de` (ohne Port!)
+   - Direktzugriff ohne Proxy: `https://otp.deinedomain.de:4444`
+4. **APP_KEY generieren**  
+   Mit einem Laravel‑Key‑Generator (z. B. lokal mit `php artisan key:generate --show`) einen `base64:`‑Key erzeugen und einsetzen.
+5. Stack in **Portainer** als neuen Stack anlegen, `docker-compose.yml` einfügen oder Datei referenzieren.
+6. 2FAuth im Browser aufrufen und ein Admin‑Konto anlegen.
 
 ---
 
@@ -99,21 +120,21 @@ services:
 | APP_NAME        | `2FAuth`                              | Name in der UI                        |
 | APP_ENV         | `production`                          | Laravel‑Umgebung                      |
 | APP_DEBUG       | `false`                               | Debug‑Modus                           |
-| APP_URL         | `https://otp.deinedomain.de:4444`     | Öffentliche URL von 2FAuth            |
+| APP_URL         | `https://otp.deinedomain.de`          | Öffentliche URL (ohne Port bei Proxy) |
 | APP_KEY         | `base64:…`                            | Verschlüsselungs‑Key                  |
 | APP_TIMEZONE    | `Europe/Berlin`                       | Zeitzone                              |
 | DB_CONNECTION   | `sqlite`                              | Datenbank‑Treiber                     |
-| DB_DATABASE     | `/2fauth/database/database.sqlite`    | DB‑Dateipfad im Container             |
+| DB_DATABASE     | `/2fauth/database.sqlite`             | DB‑Dateipfad direkt im Volume-Root    |
 
-Weitere Optionen findest du in der offiziellen 2FAuth‑Dokumentation zu Environment‑Variablen.[web:34][web:37]
+Weitere Optionen findest du in der offiziellen [2FAuth‑Dokumentation zu Environment‑Variablen](https://docs.2fauth.app/getting-started/config/).
 
 ---
 
 ## 🔐 Sicherheitshinweise
 
-- Stelle sicher, dass **APP_URL** korrekt gesetzt ist (inkl. `https` bei TLS).  
-- Nutze einen **Reverse Proxy** (z. B. Nginx Proxy Manager oder Traefik) für TLS‑Termination und zusätzliche Access‑Control.[web:42]
-- Erstelle regelmäßige Backups des Volumes `/2fauth` (insb. Datenbank & Konfiguration).
+- Stelle sicher, dass **APP_URL** korrekt gesetzt ist (inkl. `https` bei TLS).
+- Nutze einen **Reverse Proxy** (z. B. Nginx Proxy Manager oder Traefik) für TLS‑Termination und zusätzliche Access‑Control.
+- Erstelle regelmäßige Backups des Volumes `/opt/docker/2fauth` (insb. `database.sqlite` & Konfiguration).
 - Verwende starke Passwörter und, wenn möglich, separate Accounts für Familie/Team.
 
 ---
@@ -121,7 +142,7 @@ Weitere Optionen findest du in der offiziellen 2FAuth‑Dokumentation zu Environ
 ## 🧪 Roadmap / Ideen
 
 - [ ] Beispiel‑Config für Nginx Proxy Manager / Traefik  
-- [ ] Optionaler Auth‑Proxy (z. B. Authelia/Authentik) vor 2FAuth  
+- [ ] Optionaler Auth‑Proxy (z. B. Authelia/Authentik) vor 2FAuth  
 - [ ] Docker‑Healthcheck und einfache CI  
 - [ ] Tutorial speziell für Schul‑/Edu‑Setups 👨‍🏫
 

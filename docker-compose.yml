@@ -19,9 +19,14 @@ services:
       APP_NAME: "2FAuth"
       APP_ENV: "production"
       APP_DEBUG: "false"
-      APP_URL: "https://otp.deinedomain.de:4444"
+      # APP_URL ohne Port setzen, wenn du hinter einem Reverse Proxy arbeitest.
+      # Mit direktem Port-Zugriff (ohne Proxy): https://otp.deinedomain.de:4444
+      APP_URL: "https://otp.deinedomain.de"
       APP_KEY: "base64:DEIN_APP_KEY_HIER"
       APP_TIMEZONE: "Europe/Berlin"
 
       DB_CONNECTION: "sqlite"
-      DB_DATABASE: "/2fauth/database/database.sqlite"
+      # Korrekte SQLite-DB-Pfad: direkt im Volume-Root, kein Unterordner!
+      # /2fauth/database/database.sqlite würde beim Start scheitern,
+      # wenn der Unterordner 'database/' nicht manuell angelegt wurde.
+      DB_DATABASE: "/2fauth/database.sqlite"
