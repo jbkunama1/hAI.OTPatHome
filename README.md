@@ -68,6 +68,37 @@ Der korrekte, robuste Pfad legt die Datei direkt im Volume-Root ab: `/2fauth/dat
 
 ---
 
+## 🔑 APP_KEY – Pflichtformat `base64:`
+
+> ⚠️ **Häufiger Fehler – führt zu HTTP 500 ohne Log-Eintrag!**
+
+Der `APP_KEY` **muss** zwingend mit dem Prefix `base64:` beginnen. Fehlt dieses Prefix, crasht Laravel beim Start, bevor eine einzige Log-Zeile geschrieben wird.
+
+```yaml
+# ❌ FALSCH – kein Prefix, Laravel startet nicht
+APP_KEY: "tBulrEZGeXq+garhNc6HJImRXY4SXeeni3yIFm97t84="
+
+# ✅ RICHTIG – mit base64:-Prefix
+APP_KEY: "base64:DEIN_GENERIERTER_KEY_HIER=="
+```
+
+### Key generieren
+
+```bash
+# Methode 1: direkt im laufenden Container
+docker exec -it 2fauth php artisan key:generate --show
+
+# Methode 2: per openssl (Fallback)
+echo "base64:$(openssl rand -base64 32)"
+```
+
+Den ausgegebenen Wert **inkl. `base64:`** in Portainer als `APP_KEY` eintragen, dann Stack neu deployen.
+
+> 🛡️ **Sicherheit:** Den echten Key **niemals** ins Repository committen.  
+> Trage ihn ausschließlich direkt in Portainer unter *Environment variables* ein.
+
+---
+
 ## 🚀 Schnellstart (Portainer Stack / docker-compose)
 
 ```yaml
@@ -90,7 +121,7 @@ services:
       APP_ENV: "production"
       APP_DEBUG: "false"
       APP_URL: "https://otp.deinedomain.de"
-      APP_KEY: "base64:DEIN_APP_KEY_HIER"
+      APP_KEY: "base64:DEIN_GENERIERTER_KEY_HIER=="
       APP_TIMEZONE: "Europe/Berlin"
 
       DB_CONNECTION: "sqlite"
@@ -106,8 +137,7 @@ services:
    - Nur LAN: `http://192.168.x.y:4444`  
    - Mit Domain + Reverse Proxy: `https://otp.deinedomain.de` (ohne Port!)
    - Direktzugriff ohne Proxy: `https://otp.deinedomain.de:4444`
-4. **APP_KEY generieren**  
-   Mit einem Laravel‑Key‑Generator (z. B. lokal mit `php artisan key:generate --show`) einen `base64:`‑Key erzeugen und einsetzen.
+4. **APP_KEY generieren und mit `base64:`-Prefix eintragen** (siehe Abschnitt oben)
 5. Stack in **Portainer** als neuen Stack anlegen, `docker-compose.yml` einfügen oder Datei referenzieren.
 6. 2FAuth im Browser aufrufen und ein Admin‑Konto anlegen.
 
@@ -115,16 +145,16 @@ services:
 
 ## 🧩 ENV‑Variablen (Übersicht für Portainer)
 
-| Variable        | Beispielwert                          | Beschreibung                          |
-|-----------------|---------------------------------------|---------------------------------------|
-| APP_NAME        | `2FAuth`                              | Name in der UI                        |
-| APP_ENV         | `production`                          | Laravel‑Umgebung                      |
-| APP_DEBUG       | `false`                               | Debug‑Modus                           |
-| APP_URL         | `https://otp.deinedomain.de`          | Öffentliche URL (ohne Port bei Proxy) |
-| APP_KEY         | `base64:…`                            | Verschlüsselungs‑Key                  |
-| APP_TIMEZONE    | `Europe/Berlin`                       | Zeitzone                              |
-| DB_CONNECTION   | `sqlite`                              | Datenbank‑Treiber                     |
-| DB_DATABASE     | `/2fauth/database.sqlite`             | DB‑Dateipfad direkt im Volume-Root    |
+| Variable        | Beispielwert                          | Beschreibung                                        |
+|-----------------|---------------------------------------|-----------------------------------------------------|
+| APP_NAME        | `2FAuth`                              | Name in der UI                                      |
+| APP_ENV         | `production`                          | Laravel‑Umgebung                                    |
+| APP_DEBUG       | `false`                               | Debug‑Modus                                         |
+| APP_URL         | `https://otp.deinedomain.de`          | Öffentliche URL (ohne Port bei Proxy)               |
+| APP_KEY         | `base64:DEIN_KEY==`                   | ⚠️ Pflicht mit `base64:`-Prefix! Nie ins Repo!      |
+| APP_TIMEZONE    | `Europe/Berlin`                       | Zeitzone                                            |
+| DB_CONNECTION   | `sqlite`                              | Datenbank‑Treiber                                   |
+| DB_DATABASE     | `/2fauth/database.sqlite`             | DB‑Dateipfad direkt im Volume-Root                  |
 
 Weitere Optionen findest du in der offiziellen [2FAuth‑Dokumentation zu Environment‑Variablen](https://docs.2fauth.app/getting-started/config/).
 
@@ -132,6 +162,7 @@ Weitere Optionen findest du in der offiziellen [2FAuth‑Dokumentation zu Enviro
 
 ## 🔐 Sicherheitshinweise
 
+- **APP_KEY niemals ins Repository committen** – nur direkt in Portainer als ENV-Variable.
 - Stelle sicher, dass **APP_URL** korrekt gesetzt ist (inkl. `https` bei TLS).
 - Nutze einen **Reverse Proxy** (z. B. Nginx Proxy Manager oder Traefik) für TLS‑Termination und zusätzliche Access‑Control.
 - Erstelle regelmäßige Backups des Volumes `/opt/docker/2fauth` (insb. `database.sqlite` & Konfiguration).
