@@ -12,9 +12,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/jbkunama1/hAI.OTPatHome?color=blue&label=Repo%20Size)
 ![GitHub license](https://img.shields.io/github/license/jbkunama1/hAI.OTPatHome?color=brightgreen)
 ![GitHub stars](https://img.shields.io/github/stars/jbkunama1/hAI.OTPatHome?style=social)
-![CI Status](https://img.shields.io/badge/CI-coming%20soon-orange)
-
-> **Hinweis:** Ersetze den GitHub‑User `jbkunama1` in den Badge‑URLs durch deinen eigenen, falls du das Repo forken/umbenennen möchtest.
+![Status](https://img.shields.io/badge/Status-✅%20läuft-brightgreen)
 
 ---
 
@@ -34,14 +32,17 @@ Unter der Haube läuft [2FAuth](https://docs.2fauth.app/), eine spezialisierte W
 ```text
 +-------------------------+        +---------------------+
 |   Client (Browser)      | <----> |   2FAuth Container  |
-|  PC / Laptop / Tablet   |  HTTPS |   (hAI.OTPatHome)   |
+|  PC / Laptop / Tablet   |  HTTP  |   (hAI.OTPatHome)   |
 +-------------------------+        +----------+----------+
                                             |
                                             v
-                                      +-----------+
-                                      |  Volume   |
-                                      |  /2fauth  |
-                                      +-----------+
+                                  +------------------+
+                                  |     Volume       |
+                                  |  /opt/docker/    |
+                                  |  2fauth/         |
+                                  |  └── database/   |
+                                  |      └── *.sqlite|
+                                  +------------------+
 ```
 
 - 2FAuth läuft im Container auf Port **8000**
@@ -49,22 +50,19 @@ Unter der Haube läuft [2FAuth](https://docs.2fauth.app/), eine spezialisierte W
 
 ---
 
-## ⚠️ Wichtiger Hinweis: Host-Verzeichnis vorbereiten
+## ⚠️ Host-Verzeichnis vorbereiten (vor dem ersten Start)
 
-> **Vor dem ersten Start** muss das Volume-Verzeichnis auf dem Host manuell angelegt werden –  
-> sonst wird es von Docker als `root` erstellt und der Container (läuft als UID/GID 1000) kann nicht schreiben.
+> Docker würde das Verzeichnis sonst als `root` anlegen – der Container (UID/GID 1000) kann dann nicht schreiben.
 
 ```bash
-mkdir -p /opt/docker/2fauth
-touch /opt/docker/2fauth/database.sqlite
+# Unterordner anlegen – die SQLite-Datei liegt im Unterordner /database/!
+mkdir -p /opt/docker/2fauth/database
 chown -R 1000:1000 /opt/docker/2fauth
-chmod 755 /opt/docker/2fauth
+chmod -R 755 /opt/docker/2fauth
 ```
 
-**Warum `/2fauth/database.sqlite` und nicht `/2fauth/database/database.sqlite`?**  
-Der Unterordner `database/` wird vom Container nicht automatisch angelegt. Existiert er nicht,  
-schlägt `touch /2fauth/database/database.sqlite` beim Start mit einem Fehler fehl.  
-Der korrekte, robuste Pfad legt die Datei direkt im Volume-Root ab: `/2fauth/database.sqlite`.
+> ✅ Die Datei `database.sqlite` wird vom Container beim ersten Start **automatisch** angelegt –  
+> nur der Ordner muss vorher existieren und beschreibbar sein.
 
 ---
 
@@ -76,7 +74,7 @@ Der `APP_KEY` **muss** zwingend mit dem Prefix `base64:` beginnen. Fehlt dieses 
 
 ```yaml
 # ❌ FALSCH – kein Prefix, Laravel startet nicht
-APP_KEY: "tBulrEZGeXq+garhNc6HJImRXY4SXeeni3yIFm97t84="
+APP_KEY: "IrgendeinKey=="
 
 # ✅ RICHTIG – mit base64:-Prefix
 APP_KEY: "base64:DEIN_GENERIERTER_KEY_HIER=="
@@ -102,8 +100,6 @@ Den ausgegebenen Wert **inkl. `base64:`** in Portainer als `APP_KEY` eintragen, 
 ## 🚀 Schnellstart (Portainer Stack / docker-compose)
 
 ```yaml
-version: "3.8"
-
 services:
   2fauth:
     image: 2fauth/2fauth:latest
@@ -120,61 +116,62 @@ services:
       APP_NAME: "2FAuth"
       APP_ENV: "production"
       APP_DEBUG: "false"
-      APP_URL: "https://otp.deinedomain.de"
-      APP_KEY: "base64:DEIN_GENERIERTER_KEY_HIER=="
+      # Beispiel LAN:    http://192.168.178.10:4444
+      # Beispiel Domain: https://otp.deinedomain.de
+      APP_URL: "http://DEINE-IP-ODER-DOMAIN:4444"
+      APP_KEY: "base64:DEIN_GENERIERTER_KEY_HIER"
       APP_TIMEZONE: "Europe/Berlin"
 
       DB_CONNECTION: "sqlite"
-      DB_DATABASE: "/2fauth/database.sqlite"
+      # ✅ Korrekter Pfad: Unterordner /database/ im Volume!
+      DB_DATABASE: "/2fauth/database/database.sqlite"
 ```
 
 ### 🔧 Schritte
 
-1. **Host-Verzeichnis anlegen** (siehe Hinweis oben)
-2. **Volume‑Pfad anpassen**  
-   `/opt/docker/2fauth` auf deinen Wunschpfad ändern.
-3. **APP_URL setzen**  
+1. **Host-Verzeichnis anlegen** (siehe Abschnitt oben)
+2. **APP_URL setzen**  
    - Nur LAN: `http://192.168.x.y:4444`  
-   - Mit Domain + Reverse Proxy: `https://otp.deinedomain.de` (ohne Port!)
-   - Direktzugriff ohne Proxy: `https://otp.deinedomain.de:4444`
-4. **APP_KEY generieren und mit `base64:`-Prefix eintragen** (siehe Abschnitt oben)
-5. Stack in **Portainer** als neuen Stack anlegen, `docker-compose.yml` einfügen oder Datei referenzieren.
-6. 2FAuth im Browser aufrufen und ein Admin‑Konto anlegen.
+   - Mit Domain + Reverse Proxy: `https://otp.deinedomain.de` (ohne Port)
+3. **APP_KEY generieren** und mit `base64:`-Prefix in Portainer eintragen
+4. Stack in **Portainer** deployen
+5. 2FAuth im Browser aufrufen und Admin‑Konto anlegen
 
 ---
 
-## 🧩 ENV‑Variablen (Übersicht für Portainer)
+## 🧩 ENV‑Variablen (Übersicht)
 
-| Variable        | Beispielwert                          | Beschreibung                                        |
-|-----------------|---------------------------------------|-----------------------------------------------------|
-| APP_NAME        | `2FAuth`                              | Name in der UI                                      |
-| APP_ENV         | `production`                          | Laravel‑Umgebung                                    |
-| APP_DEBUG       | `false`                               | Debug‑Modus                                         |
-| APP_URL         | `https://otp.deinedomain.de`          | Öffentliche URL (ohne Port bei Proxy)               |
-| APP_KEY         | `base64:DEIN_KEY==`                   | ⚠️ Pflicht mit `base64:`-Prefix! Nie ins Repo!      |
-| APP_TIMEZONE    | `Europe/Berlin`                       | Zeitzone                                            |
-| DB_CONNECTION   | `sqlite`                              | Datenbank‑Treiber                                   |
-| DB_DATABASE     | `/2fauth/database.sqlite`             | DB‑Dateipfad direkt im Volume-Root                  |
+| Variable        | Beispielwert                             | Beschreibung                                      |
+|-----------------|------------------------------------------|---------------------------------------------------|
+| `APP_NAME`      | `2FAuth`                                 | Name in der UI                                    |
+| `APP_ENV`       | `production`                             | Laravel‑Umgebung                                  |
+| `APP_DEBUG`     | `false`                                  | Debug‑Modus (nur zur Fehlersuche `true`)          |
+| `APP_URL`       | `http://192.168.178.10:4444`             | Echte IP/Domain, kein Trailing-Slash!             |
+| `APP_KEY`       | `base64:DEIN_KEY`                        | ⚠️ Pflicht mit `base64:`-Prefix! Nie ins Repo!    |
+| `APP_TIMEZONE`  | `Europe/Berlin`                          | Zeitzone                                          |
+| `DB_CONNECTION` | `sqlite`                                 | Datenbank‑Treiber                                 |
+| `DB_DATABASE`   | `/2fauth/database/database.sqlite`       | ✅ Pfad inkl. Unterordner `/database/`            |
 
-Weitere Optionen findest du in der offiziellen [2FAuth‑Dokumentation zu Environment‑Variablen](https://docs.2fauth.app/getting-started/config/).
+Weitere Optionen: [2FAuth‑Dokumentation](https://docs.2fauth.app/getting-started/config/)
 
 ---
 
 ## 🔐 Sicherheitshinweise
 
 - **APP_KEY niemals ins Repository committen** – nur direkt in Portainer als ENV-Variable.
+- **APP_KEY rotieren** nach dem Einrichten oder wenn er versehentlich sichtbar war:  
+  `docker exec -it 2fauth php artisan key:generate --show`
 - Stelle sicher, dass **APP_URL** korrekt gesetzt ist (inkl. `https` bei TLS).
-- Nutze einen **Reverse Proxy** (z. B. Nginx Proxy Manager oder Traefik) für TLS‑Termination und zusätzliche Access‑Control.
-- Erstelle regelmäßige Backups des Volumes `/opt/docker/2fauth` (insb. `database.sqlite` & Konfiguration).
-- Verwende starke Passwörter und, wenn möglich, separate Accounts für Familie/Team.
+- Nutze einen **Reverse Proxy** (z. B. Nginx Proxy Manager oder Traefik) für TLS-Termination.
+- Regelmäßige Backups: `/opt/docker/2fauth/database/database.sqlite`
 
 ---
 
 ## 🧪 Roadmap / Ideen
 
-- [ ] Beispiel‑Config für Nginx Proxy Manager / Traefik  
-- [ ] Optionaler Auth‑Proxy (z. B. Authelia/Authentik) vor 2FAuth  
-- [ ] Docker‑Healthcheck und einfache CI  
+- [ ] Beispiel‑Config für Nginx Proxy Manager / Traefik
+- [ ] Optionaler Auth‑Proxy (z. B. Authelia/Authentik) vor 2FAuth
+- [ ] Docker‑Healthcheck und einfache CI
 - [ ] Tutorial speziell für Schul‑/Edu‑Setups 👨‍🏫
 
 Pull Requests & Issues sind willkommen! 🙌
