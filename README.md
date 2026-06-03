@@ -86,7 +86,7 @@ services:
    - Nur LAN: `http://192.168.x.y:4444`  
    - Mit Domain: `https://otp.deinedomain.de:4444` oder hinter Reverse Proxy ohne Port.[web:33][web:45]
 3. **APP_KEY generieren**  
-   Mit einem Laravel‑Key‑Generator (z. B. lokal mit `php artisan key:generate --show`) einen `base64:`‑Key erzeugen und einsetzen.[web:33][web:37]
+   Key mit `openssl rand -base64 32` erzeugen und als `APP_KEY` im Format `base64:DEIN_KEY` eintragen.
 4. Stack in **Portainer** als neuen Stack anlegen, `docker-compose.yml` einfügen oder Datei referenzieren.
 5. 2FAuth im Browser aufrufen und ein Admin‑Konto anlegen.
 
