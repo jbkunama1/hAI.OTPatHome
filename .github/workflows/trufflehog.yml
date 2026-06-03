@@ -2,7 +2,7 @@ name: TruffleHog Secret Scan
 
 on:
   schedule:
-    - cron: '0 2 * * *'   # Daily at 02:00 UTC
+    - cron: '0 2 * * *'   # Daily at 02:00 (GitHub cron uses UTC)
   push:
     branches: [ main, master ]
 
