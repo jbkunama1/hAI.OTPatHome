@@ -1,5 +1,9 @@
 # 🔐 hAI.OTPatHome – Self‑Hosted OTP @ Home
 
+<a href="https://www.buymeacoffee.com/highfish">
+<img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
+</a>
+
 > **hAI.OTPatHome** ist ein schlankes Setup, um **TOTP‑Codes selbst zu hosten** – ideal als Ersatz für Handy‑Authenticator‑Apps.  
 > Basis ist [2FAuth](https://github.com/Bubka/2FAuth), gepackt in einen Portainer‑Stack für dein Heimnetz. 🚀
 
@@ -181,3 +185,4 @@ Pull Requests & Issues sind willkommen! 🙌
 ## 📜 Lizenz
 
 Dieses Projekt steht unter der **MIT Lizenz** – siehe [`LICENSE`](./LICENSE) für Details.
+
