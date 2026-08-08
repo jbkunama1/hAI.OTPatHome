@@ -13,10 +13,10 @@
 
 ## 🛡️ Projekt-Status & Infos
 
-![GitHub repo size](https://img.shields.io/github/repo-size/jbkunama1/hAI.OTPatHome?color=blue&label=Repo%20Size)
-![GitHub license](https://img.shields.io/github/license/jbkunama1/hAI.OTPatHome?color=brightgreen)
-![GitHub stars](https://img.shields.io/github/stars/jbkunama1/hAI.OTPatHome?style=social)
-![Status](https://img.shields.io/badge/Status-✅%20läuft-brightgreen)
+[![GitHub repo size](https://img.shields.io/github/repo-size/jbkunama1/hAI.OTPatHome?color=blue&label=Repo%20Size)](https://github.com/jbkunama1/hAI.OTPatHome)
+[![GitHub license](https://img.shields.io/github/license/jbkunama1/hAI.OTPatHome?color=brightgreen)](https://github.com/jbkunama1/hAI.OTPatHome)
+[![GitHub stars](https://img.shields.io/github/stars/jbkunama1/hAI.OTPatHome?style=social)](https://github.com/jbkunama1/hAI.OTPatHome)
+[![Status](https://img.shields.io/badge/Status-✅%20läuft-brightgreen)](https://github.com/jbkunama1/hAI.OTPatHome)
 
 ---
 
@@ -185,4 +185,3 @@ Pull Requests & Issues sind willkommen! 🙌
 ## 📜 Lizenz
 
 Dieses Projekt steht unter der **MIT Lizenz** – siehe [`LICENSE`](./LICENSE) für Details.
-
